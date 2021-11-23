@@ -45,17 +45,32 @@ debug("Test");
 world = {};
 
 //XXX: TODO Make this prettier!
-function drawCircle(context,entity) {
+// https://library.superhi.com/posts/how-to-paint-with-code-creating-paintbrushes
+function drawCircle(context,entity,prevEntity) {
     with(context) {
-        beginPath();                
+        beginPath();              
         lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
-        //moveTo(x,y);
+        var px = prevEntity["x"];
+        var py = prevEntity["y"];
+        var xdiff = x - px;
+        var ydiff = y - py;
+        // Get the magnitude of the two points
+        var mag = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        // Generate a random color if specified
+        if (entity["colour"] === "random") {
+            var randomColour = Math.floor(Math.random()*16777215).toString(16);
+            entity["colour"] = "#" + randomColour;
+        }
         fillStyle = entity["colour"];
-        strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        globalAlpha = 0.3;
+        // Set the radius based on speed faster the mouse movement the smaller the radius
+        r = Math.max((75 - mag) / 3, 1);
+        // moveTo(x,y);
+        arc(x, y, r, 0, 2.0 * Math.PI, false);  
+
+        fill();  
     }
 }
 
@@ -63,16 +78,13 @@ function prepEntity(entity) {
     if (!entity["colour"]) {
         entity["colour"] = "#FF0000";
     }
-    if (!entity["radius"]) {
-        entity["radius"] = 50;
-    }
     return entity;
 }
 
 function clearFrame() {
     with(context) {
 	moveTo(0,0);
-	fillStyle = "#000";
+	fillStyle = "#F9F8F4";
 	fillRect(0,0,W,H);
     }
 
@@ -81,9 +93,13 @@ function clearFrame() {
 // This actually draws the frame
 function renderFrame() {
     clearFrame();
-    for (var key in world) {
-        var entity = world[key];
-        drawCircle(context,prepEntity(entity));
+    if (Object.keys(world).length != 0) {
+        var prevEntity = world[Object.keys(world)[0]]
+        for (var key in world) {
+            var entity = world[key];
+            drawCircle(context,prepEntity(entity), prepEntity(prevEntity));
+            prevEntity = entity;
+        }
     }
 }
 
@@ -125,10 +141,18 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    fetch('./entity/' + entity,
+        {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 }
 var counter = 0;
 function addEntityWithoutName(data) {
-    var name = "X"+(counter++)%100;
+    var name = "X"+(counter++)%1000;
     addEntity(name,data);
 }
 
@@ -231,16 +255,15 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'transparent'});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'transparent'});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+    addEntityWithoutName({'x':x,'y':y,'colour':'random',});
 });
 
 
@@ -254,6 +277,14 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        // Fetch the world
+        fetch('./world').then((res) => {
+            res.json().then((data) => {
+                world = data;
+                drawNext = true;
+                counter = Object.keys(world).length;
+            })
+        });
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +292,15 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here? 
+            external_msg = JSON.parse(msg.data);
+            for (entity in external_msg) {
+                if (world[entity] != external_msg[entity]) {
+                    world[entity] = external_msg[entity];
+                    drawNext = true;
+                    counter = Number(entity.split('X')[1]) + 1;
+                }
+            }           
         } catch (e) {
             alert("socket on message: " + e);
         }
