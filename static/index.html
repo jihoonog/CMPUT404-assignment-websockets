@@ -40,11 +40,9 @@ function debug(str) {
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
 }
-debug("Test");
 
 world = {};
 
-//XXX: TODO Make this prettier!
 // https://library.superhi.com/posts/how-to-paint-with-code-creating-paintbrushes
 function drawCircle(context,entity,prevEntity) {
     with(context) {
@@ -139,9 +137,9 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    // drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
-    fetch('./entity/' + entity,
+    fetch('/entity/' + entity,
         {
             method: 'post',
             headers: {
@@ -152,7 +150,7 @@ function addEntity(entity, data) {
 }
 var counter = 0;
 function addEntityWithoutName(data) {
-    var name = "X"+(counter++)%1000;
+    var name = "X"+(counter++)%100000;
     addEntity(name,data);
 }
 
@@ -253,7 +251,6 @@ mouse = (function() {
 })();
 
 // Add the application specific mouse listeners!
-//XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'transparent'});
 });
@@ -278,7 +275,7 @@ function wsSetup() {
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
         // Fetch the world
-        fetch('./world').then((res) => {
+        fetch('/world').then((res) => {
             res.json().then((data) => {
                 world = data;
                 drawNext = true;
@@ -291,9 +288,10 @@ function wsSetup() {
     };
     socket.onmessage = function(msg) {  
         try {
-            debug("WebSocket Recv:" + msg.data);
+            // debug("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here? 
             external_msg = JSON.parse(msg.data);
+            // print(external_msg)
             for (entity in external_msg) {
                 if (world[entity] != external_msg[entity]) {
                     world[entity] = external_msg[entity];

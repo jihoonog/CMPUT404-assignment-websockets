@@ -90,6 +90,7 @@ def hello():
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
+    
     data = ws.receive()
     while data:
         entities = json.loads(data)
@@ -117,7 +118,7 @@ def subscribe_socket(ws):
         print("WS Error %s" % e)
     finally:
         clients.remove(client)
-        gevent.kill(g)
+        gevent.kill(e)
 
     return None
 
@@ -149,14 +150,15 @@ def world():
 @app.route("/entity/<entity>")    
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return Response(json.dumps(myWorld.world()), status=200, mimetype="application/json") # https://flask.palletsprojects.com/en/2.0.x/api/#response-objects
+    return Response(json.dumps(myWorld.get(entity)), status=200, mimetype="application/json") # https://flask.palletsprojects.com/en/2.0.x/api/#response-objects
 
 
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
+    print("here")
     myWorld.clear()
-    return Response(json.dumps(myWorld.get(entity)), status=200, mimetype="application/json") # https://flask.palletsprojects.com/en/2.0.x/api/#response-objects
+    return Response(json.dumps(myWorld.world()), status=200, mimetype="application/json") # https://flask.palletsprojects.com/en/2.0.x/api/#response-objects
 
 
 if __name__ == "__main__":

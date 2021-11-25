@@ -17,7 +17,24 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+References
+
+==========
+Flask Response and Redirect Methods
+
+* https://flask.palletsprojects.com/en/2.0.x/api/#flask.redirect
+* https://flask.palletsprojects.com/en/2.0.x/api/#response-objects
+
+Dr. Hindle's In-class web-socket examples
+
+* https://github.com/uofa-cmput404/cmput404-slides/tree/79a76ce8a185a877196b472f34b14bb29dd39aed/examples/WebSocketsExamples/chat.py
+
+Canvas API styling and ideas 
+
+* https://library.superhi.com/posts/how-to-paint-with-code-creating-paintbrushes
+
 Contributors / Licensing
+
 ========================
 
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
