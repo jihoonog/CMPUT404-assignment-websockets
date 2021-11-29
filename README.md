@@ -18,7 +18,6 @@ pip install -r requirements.txt
 ```
 
 References
-
 ==========
 Flask Response and Redirect Methods
 
@@ -33,8 +32,11 @@ Canvas API styling and ideas
 
 * https://library.superhi.com/posts/how-to-paint-with-code-creating-paintbrushes
 
-Contributors / Licensing
+Canvas drawing mechacism was based on my ajax assignment
 
+* https://github.com/jihoonog/CMPUT404-assignment-ajax
+
+Contributors / Licensing
 ========================
 
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
@@ -71,7 +73,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 Contributors
-
 ============
 
 * Mark Galloway
@@ -79,7 +80,6 @@ Contributors
 * Cole Mackenzie
 
 Collaboration
-
 ============
 
 I did not collaborate with any students or other persons for this assignment.
